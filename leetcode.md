@@ -1,5 +1,5 @@
-####leetcode题解
-#####岛屿数量(200)
+#### leetcode题解
+##### 岛屿数量(200)
   - BFS
     ```javascript
     function bfs(grid, i, j) {
@@ -80,7 +80,7 @@
     };
     ```
 
-#####用队列实现栈(225)
+##### 用队列实现栈(225)
   - 单队列实现栈
     ```javascript
     MyStack.prototype.push = function(x) {
@@ -106,7 +106,7 @@
     };
     ```
 
-#####用栈实现队列(232)
+##### 用栈实现队列(232)
   - 双栈实现队列
     ```javascript
     var MyQueue = function() {
@@ -149,7 +149,7 @@
     };
     ```
 
-#####字符串解码(394)
+##### 字符串解码(394)
   - 栈解法
   ```javascript
   var decodeString = function(s) {
@@ -210,7 +210,7 @@
   };
   ```
 
-#####目标和(494)
+##### 目标和(494)
   - DFS
   ```javascript
   var findTargetSumWays = function(nums, S) {
