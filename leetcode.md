@@ -230,3 +230,120 @@
     return res;
   };
   ```
+
+##### 01矩阵(542)
+  - BFS
+  图的多源BFS算法，把所有源头加入队列，一次遍历。
+  需要把图中除源头外的节点标记为未访问
+  ```javascript
+  var updateMatrix = function(matrix) {
+    let queue = new Array();
+    const r_limit = matrix.length;
+    const c_limit = matrix[0].length;
+    const DIRECTION = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    for (let i = 0; i < r_limit; i++) {
+        for (let j = 0; j < c_limit; j++) {
+            if (matrix[i][j] == 0) {
+                queue.push([i, j]);
+            } else {
+                //标记为未访问
+                matrix[i][j] = -1;
+            }
+        }
+    }
+
+    while (queue.length) {
+        const pos = queue.shift();
+        for (const ele of DIRECTION) {
+            const row = pos[0] + ele[0];
+            const column = pos[1] + ele[1];
+            if (row >= 0 && row < r_limit && column >= 0 && column < c_limit && matrix[row][column] == -1) {
+                matrix[row][column] = matrix[pos[0]][pos[1]] + 1;
+                queue.push([row, column]);
+            }
+        }
+    }
+
+    return matrix;
+  };
+  ```
+
+##### 图像渲染(733)
+  - BFS
+  ```javascript
+  var floodFill = function(image, sr, sc, newColor) {
+    const preColor = image[sr][sc];
+    let queue = new Array();
+    const r_limit = image.length;
+    const c_limit = image[0].length;
+    const DIRECTION = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    queue.push([sr, sc]);
+    while (queue.length) {
+      const pos = queue.shift();
+      image[pos[0]][pos[1]] = newColor;
+      for (const ele of DIRECTION) {
+          const row = pos[0] + ele[0];
+          const column = pos[1] + ele[1];
+          if (row < 0 || row >= r_limit || column < 0 || column >= c_limit || image[row][column] != preColor || image[row][column] == newColor) {
+              continue;
+          } else {
+              queue.push([row, column]);
+          }
+      }
+    }
+
+    return image;
+  };
+  ```
+  - DFS
+  ```javascript
+  var floodFill = function(image, sr, sc, newColor) {
+    if(image[sr][sc] === newColor){
+        return image;
+    }
+    const oldColor = image[sr][sc];
+    let dfs = (sr, sc) => {
+        if(sr < 0 || sr >= image.length || sc < 0 ||
+        sc >= image[0].length || image[sr][sc] !== oldColor){
+            return;
+        }
+        image[sr][sc] = newColor;
+        dfs(sr + 1, sc);
+        dfs(sr - 1, sc);
+        dfs(sr, sc + 1);
+        dfs(sr, sc - 1);
+    }
+    dfs(sr, sc);
+    return image;
+  };
+  ```
+
+  ##### 钥匙和房间(841)
+  - DFS
+    ```javascript
+    var canVisitAllRooms = function(rooms) {
+      let keys = new Set();
+      let stack = new Array();
+
+      stack.push(0);
+      keys.add(0);
+      while(stack.length) {
+        const room = stack[stack.length - 1];
+        let flag = true;
+        for (const ele of rooms[room]) {
+            if (!keys.has(ele)) {
+                stack.push(ele);
+                keys.add(ele);
+                flag = false;
+            }
+        }
+        if (flag) {
+            stack.pop();
+        }
+      }
+
+      return keys.size == rooms.length ? true : false;
+    };
+    ```
