@@ -1,4 +1,41 @@
 #### leetcode题解
+##### 对链表进行插入排序(147)
+  ```javascript
+  var insertionSortList = function(head) {
+    if (head == null) {
+        return head;
+    }
+    //创建一个假头部，便于在头部之前插入元素
+    let dummyHead = new ListNode(0, head);
+    //记录已经排序好的链表的最后一位，从后面lastSorted
+    //后查找需要插入的元素
+    let lastSorted = head;
+    let curr = head.next;
+
+    while (curr) {
+        if (lastSorted.val <= curr.val) {
+            lastSorted = lastSorted.next;
+        } else {
+            let prev = dummyHead;
+            while (prev.next) {
+                if (prev.next.val > curr.val) {
+                    lastSorted.next = curr.next;
+                    curr.next = prev.next;
+                    prev.next = curr;
+                    //curr前的node都已经排序完成，只需要插入一次即可
+                    break;
+                } else {
+                    prev = prev.next;
+                }
+            }
+        }
+        curr = lastSorted.next;
+    }
+
+    return dummyHead.next;
+  };
+  ```
+
 ##### 岛屿数量(200)
   - BFS
     ```javascript
@@ -148,6 +185,27 @@
       return false;
     };
     ```
+
+##### 移动零(283)
+  - 冒泡排序写法
+  ```javascript
+  var moveZeroes = function(nums) {
+    let swap = true;
+    for (let i = 0; i < nums.length - 1; i++) {
+        if (!swap) {
+            break;
+        }
+        swap = false;
+        for (let j = 0; j < nums.length - i- 1; j++) {
+            if (nums[j] == 0) {
+                nums[j] = nums[j + 1];
+                nums[j + 1] = 0;
+                swap = true;
+            }
+        }
+    }
+  };
+  ```
 
 ##### 字符串解码(394)
   - 栈解法
