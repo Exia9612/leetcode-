@@ -1,4 +1,35 @@
 #### leetcode题解
+##### 合并两个有序链表(21)
+```javascript
+//双指针合并有序数组
+var mergeTwoLists = function(l1, l2) {
+    let dummyHead = new ListNode(0)
+    let resNode = dummyHead;
+
+    while (l1 != null && l2 != null) {
+        if (l1.val <= l2.val) {
+            resNode.next = l1;
+            resNode = resNode.next;
+            l1 = l1.next;
+        } else {
+            resNode.next = l2;
+            resNode = resNode.next;
+            l2 = l2.next;
+        }
+    }
+    while (l1 != null) {
+        resNode.next = l1;
+        resNode = resNode.next;
+        l1 = l1.next;
+    }
+    while (l2 != null) {
+        resNode.next = l2;
+        resNode = resNode.next;
+        l2 = l2.next;
+    }
+    return dummyHead.next;
+};
+```
 ##### 对链表进行插入排序(147)
   ```javascript
   var insertionSortList = function(head) {
@@ -405,3 +436,59 @@
       return keys.size == rooms.length ? true : false;
     };
     ```
+
+##### 数组中的逆序对(剑指offer 51)
+```javascript
+function merge(nums, start, end, result, count) {
+    let mid = parseInt((start + end) / 2);
+    let index1 = start;
+    let index2 = mid + 1;
+    let rindex = start;
+
+    while(index1 <= mid && index2 <= end) {
+        if (nums[index1] <= nums[index2]) {
+            /** 当两个顺序数组中，左面的数组中的当前元素小于等于右面的当前元素时，逆序对数量增加。增加的量是右边数组指向当前元素的指针的偏移量。因为是有序的所以左边的当前元素一定大于之前的右边元素 **/
+            count += index2 - mid - 1;
+            result[rindex++] = nums[index1++];
+        }else {
+            result[rindex++] = nums[index2++];
+        }
+    }
+
+    while (index1 <= mid) {
+      /** 如果左边元素没有超出最后一个元素的位置，则说明左边有序数组的剩余的元素均大于右边的所有元素，逆序对数量每次增加右边元素的数量 **/
+        result[rindex++] = nums[index1++];
+        count += (end - mid);
+    }
+    while (index2 <= end) {
+        result[rindex++] = nums[index2++];
+    }
+    while (start <= end) {
+        nums[start] = result[start++];
+    }
+    return count;
+}
+
+function mergesort(nums, start, end, result, count) {
+    if (start >= end){
+        return 0;
+    }
+    let mid = parseInt((start + end) / 2);
+    let lres = mergesort(nums, start, mid, result, count);
+    let rres = mergesort(nums, mid + 1, end, result, count);
+    count = lres + rres;
+
+    let res = merge(nums, start, end, result, count);
+    return res;
+}
+
+var reversePairs = function(nums) {
+    if (nums.length <= 1) {
+        return 0;
+    }
+    let result = new Array(nums.length);
+    let count = mergesort(nums, 0, nums.length - 1, result, 0);
+    return count;
+};
+
+``` 
