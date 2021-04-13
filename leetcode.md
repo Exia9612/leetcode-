@@ -30,6 +30,360 @@ var mergeTwoLists = function(l1, l2) {
     return dummyHead.next;
 };
 ```
+
+##### 合并k个升序链表(23)
+- 堆排序：先取出所有链表的所有元素放入一个数组中，然后对数组用堆排序，再将排序好的数组元素一次做成节点连接成链表
+```javascript
+function exchangeVal(array, i, j) {
+    let temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+}
+
+function heapify(array, pos, size) {
+     //从上到下
+     //size是array的长度
+    let leftChild = 2 * pos + 1;
+    let rightChild = leftChild + 1;
+    let largeChild = pos;
+
+    if (leftChild < size && array[largeChild] < array[leftChild]) {
+      largeChild = leftChild
+    } 
+    if (rightChild < size && array[largeChild] < array[rightChild]) {
+      largeChild = rightChild;
+    }
+    if (largeChild != pos) {
+      exchangeVal(array, pos, largeChild);
+      heapify(array, largeChild, size);
+    }
+}
+
+function buildHeap(array) {
+    for (let i = Math.ceil((array.length - 1) / 2 - 1); i>= 0; i--) {
+        heapify(array, i, array.length);
+    }
+}
+
+function heapSort(array, size) {
+    //array是已经堆化的数组
+    //size是未排序的堆元素的长度
+    // if (size <= 0) {
+    //   return array;
+    // }
+    for (let i = size - 1; i >= 1; i--) {
+        exchangeVal(array, 0, i);
+        heapify(array, 0, i);
+    }
+}
+
+var sortArray = function(nums) {
+    // nums = [4, 6, 8, 5, 9, 10, 22];
+    buildHeap(nums);
+    heapSort(nums, nums.length);
+    return nums; 
+};
+
+
+var mergeKLists = function(lists) {
+    let tempArray = new Array();
+    let resList = new ListNode(0, null);
+    let dummyHead = resList;
+
+    for (let list of lists) {
+        while (list != null) {
+            tempArray.push(list.val);
+            list = list.next;
+        }
+    }
+
+    sortArray(tempArray);
+    for (let val of tempArray) {
+        const node = new ListNode(val, null);
+        resList.next = node;
+        resList = resList.next;
+    }
+
+    return dummyHead.next;
+};
+```
+
+##### 对称二叉树(101)
+```javascript
+- 递归
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+function compare(left_child, right_child) {
+    if (!left_child && !right_child) {
+        return true;
+    }
+    if (!left_child || !right_child) {
+        return false;;
+    }
+    if (left_child.val != right_child.val) {
+        return false;
+    } 
+    return compare(left_child.left, right_child.right) && compare(left_child.right, right_child.left);
+}
+
+var isSymmetric = function(root) {
+    if (!root) {
+        return false;
+    }
+    return compare(root.left, root.right);
+};
+```
+
+##### 二叉树层序遍历(102)
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[][]}
+ */
+var levelOrder = function(root) {
+    let res = new Array();
+    let queue = new Array();
+    if (root) {
+        queue.push(root);
+    }
+
+    while (queue.length) {
+        let levelArray = new Array();
+        let levelLength = queue.length;
+        while (levelLength) {
+            const node = queue.shift();
+            levelArray.push(node.val);
+            if (node.left) {
+                queue.push(node.left);
+            }
+            if (node.right) {
+                queue.push(node.right);
+            }
+            levelLength--;
+        }
+        res.push(levelArray);
+    }
+    return res;
+};
+```
+
+##### 二叉树最大深度
+- 递归解法(自顶向下)
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+function findMaxDepth(node, depth) {
+    if (!node) {
+        return depth;
+    } else {
+        depth++;
+        let leftRes = findMaxDepth(node.left, depth);
+        let rightRes = findMaxDepth(node.right, depth);
+        return leftRes >= rightRes ? leftRes : rightRes;
+    } 
+}
+
+var maxDepth = function(root) {
+    let res = findMaxDepth(root, 0);
+    return res;
+};
+```
+
+##### 二叉树的前序遍历(144)
+- 迭代解法
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var preorderTraversal = function(root) {
+    let res = new Array();
+    let stack = new Array();
+    let currentNode;
+
+    if (root) {
+        stack.push(root);
+    }
+
+    while (stack.length) {
+        currentNode = stack.pop();
+        res.push(currentNode.val);
+
+        //因为是栈结构，先进右再进左
+        if (currentNode.right) {
+            stack.push(currentNode.right);
+        }
+        if (currentNode.left) {
+            stack.push(currentNode.left);
+        }
+    }
+    return res;
+};
+```
+- 递归解法
+```javascript
+function pre (node, res) {
+    if (node) {
+        res.push(node.val);
+        pre(node.left, res);
+        pre(node.right, res);
+    }
+}
+
+var preorderTraversal = function(root) {
+    let res = new Array();
+    
+    pre(root, res);
+
+    return res;
+};
+```
+
+##### 二叉树的中序遍历(94)
+- 迭代
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+
+var inorderTraversal = function(root) {
+    let res = new Array();
+    let stack = new Array();
+    let currentNode = root;
+
+    while (stack.length || currentNode) {
+        while (currentNode) {
+            stack.push(currentNode);
+            currentNode = currentNode.left;
+        }
+        currentNode = stack.pop();
+        res.push(currentNode.val);
+        currentNode = currentNode.right;
+    }
+    return res;
+};
+```
+- 递归
+```javascript
+function inorder(node, res) {
+    if (node) {
+        inorder(node.left, res);
+        res.push(node.val);
+        inorder(node.right, res);
+    }
+    return;
+}
+
+var inorderTraversal = function(root) {
+    let res = new Array();
+    inorder(root, res);
+    return res;
+};
+```
+
+##### 二叉树的后序遍历(145)
+```javascript
+- 递归
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+function postorder(node, res) {
+    if (node) {
+        if (node.left) {
+            postorder(node.left, res);
+        } 
+        if (node.right) {
+            postorder(node.right, res);
+        } 
+        res.push(node.val);
+    }
+    return;
+}
+
+var postorderTraversal = function(root) {
+    let res = new Array();
+    postorder(root, res);
+    return res;
+};
+```
+- 迭代
+```javascript
+var postorderTraversal = function(root) {
+    let res = new Array();
+    let dequeue = new Array();
+
+    if (root) {
+        dequeue.push(root);
+    }
+    /** 因为后序遍历顺序是左右根，但按此顺序执行较困难，所以可以按照根右左的顺序添加答案 **/
+    while (dequeue.length) {
+        const node = dequeue.pop();
+        res.unshift(node.val);
+        if (node.left) {
+            dequeue.push(node.left)
+        }
+        if (node.right) {
+            dequeue.push(node.right);
+        }
+    }
+    return res;
+};
+```
+
 ##### 对链表进行插入排序(147)
   ```javascript
   var insertionSortList = function(head) {
