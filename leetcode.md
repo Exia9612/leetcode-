@@ -109,8 +109,8 @@ var mergeKLists = function(lists) {
 ```
 
 ##### 对称二叉树(101)
-```javascript
 - 递归
+```javascript
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -141,6 +141,51 @@ var isSymmetric = function(root) {
         return false;
     }
     return compare(root.left, root.right);
+};
+```
+- 迭代
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+
+var isSymmetric = function(root) {
+    if (!root) {
+        return false;
+    } else if (!root.left && !root.right) {
+        return true;
+    } else if (!root.left || !root.right) {
+        return false;
+    }
+    let queue = new Array();
+    queue.push(root.left, root.right);
+    while (queue.length) {
+        let firstNode = queue.shift();
+        let secondNode = queue.shift();
+        if (!firstNode && !secondNode) {
+            continue;
+        }
+        if (!firstNode || !secondNode) {
+            return false;
+        }
+        if (firstNode.val != secondNode.val) {
+            return false;
+        }
+        queue.push(firstNode.left);
+        queue.push(secondNode.right);
+        queue.push(firstNode.right);
+        queue.push(secondNode.left);
+    }
+    return true;
 };
 ```
 
@@ -381,6 +426,136 @@ var postorderTraversal = function(root) {
         }
     }
     return res;
+};
+```
+
+##### 从前序与中序遍历序列构造二叉树(105)
+- 递归
+```javascript
+var buildTree = function(preorder, inorder) {
+    let inorderMap = new Map();
+    inorder.forEach((item, index) => {
+        inorderMap.set(item, index);
+    })
+
+    function fn(start, end) {
+        if (start > end) {
+            return null;
+        }
+        let rootVal = preorder.shift();
+        let root = new TreeNode(rootVal);
+        let rootIndex = inorderMap.get(rootVal);
+        root.left = fn(start, rootIndex - 1);
+        root.right = fn(rootIndex + 1, end);
+        return root;
+    }
+    let res = fn(0, inorder.length - 1);
+    return res;
+};
+```
+
+##### 从中序与后序遍历序列构造二叉树(106)
+- 递归
+```javascript
+var buildTree = function(inorder, postorder) {
+    let inorderMap = new Map();
+    //对中序遍历建立哈希索引，只需时间复杂度O(1)即可查找到元素
+    inorder.forEach((item, index) => {
+        inorderMap.set(item, index);
+    })
+
+    function fn(start, end) {
+        if (start > end) {
+            return null;
+        }
+        let rootVal = postorder.pop();
+        let root = new TreeNode(rootVal);
+        let rootIndex = inorderMap.get(rootVal);
+        root.right = fn(rootIndex + 1, end);
+        root.left = fn(start, rootIndex - 1);
+        return root;
+    }
+    let res = fn(0, inorder.length - 1);
+    return res;
+};
+```
+
+##### 路径总和(112)
+- 递归
+```javascript
+var hasPathSum = function(root, targetSum) {
+    if (root == null) {
+        return false;
+    }                // 遍历到null节点
+  if (root.left == null && root.right == null) { // 遍历到叶子节点
+    return targetSum - root.val == 0;                  // 如果满足这个就返回true。否则返回false
+  }
+  // 当前递归问题 拆解成 两个子树的问题，其中一个true了就行
+  return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val);
+};
+```
+- BFS
+```javascript
+var hasPathSum = function(root, targetSum) {
+    if (!root) {
+        return false;
+    }
+    let nodeQueue = new Array();
+    let sumQueue = new Array();
+    let currentNode = root;
+    let currentSum = 0;
+    nodeQueue.push(root);
+    sumQueue.push(root.val);
+    let flag = false;
+
+    while (nodeQueue.length) {
+        currentNode = nodeQueue.shift();
+        currentSum = sumQueue.shift();
+        if (currentNode.left) {
+            nodeQueue.push(currentNode.left);
+            sumQueue.push(currentSum + currentNode.left.val);
+        }
+        if (currentNode.right) {
+            nodeQueue.push(currentNode.right);
+            sumQueue.push(currentSum + currentNode.right.val);
+        }
+        if (!currentNode.left && !currentNode.right && currentSum == targetSum) {
+            flag = true;
+            break;
+        }
+    }
+    return flag;
+};
+```
+
+##### 填充每个节点的下一个右侧节点指针(116)
+- BFS
+```javascript
+var connect = function(root) {
+    if (!root) {
+        return root;
+    }
+    let queue = new Array();
+    let currentNode;
+    let currentLength;
+
+    queue.push(root);
+    while (queue.length) {
+        currentLength = queue.length;
+        for (let i = 0; i < currentLength; i++) {
+            currentNode = queue.shift();
+            if (i == currentLength - 1) {
+                currentNode.next = null;
+            } else {
+                currentNode.next = queue[0];
+            }
+            if (currentNode.left || currentNode.right) {
+                queue.push(currentNode.left);
+                queue.push(currentNode.right);
+            }
+        }
+    }
+    return root;
 };
 ```
 
