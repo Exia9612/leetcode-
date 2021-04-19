@@ -1,4 +1,150 @@
 #### leetcode题解
+##### 两数之和(1)
+- 暴力迭代
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number[]}
+ */
+var twoSum = function(nums, target) {
+    let res = new Array();
+    for (let i = 0; i < nums.length - 1; i++) {
+        for (j = i + 1; j < nums.length; j++) {
+            if (nums[i] + nums[j] == target) {
+                res.push(i);
+                res.push(j);
+                return res;
+            }
+        }
+    }
+    return res;
+};
+```
+- 哈希表
+```javascript
+var twoSum = function(nums, target) {
+    let map = new Map();
+    let res = new Array();
+    for (let i = 0; i < nums.length; i++) {
+        map.set(nums[i], i);
+    }
+    for (let i = 0; i < nums.length; i++) {
+        let temp = target - nums[i];
+        if (map.get(temp) && map.get(temp) != i) {
+            res.push(i);
+            res.push(map.get(temp));
+            return res;
+        }
+    }
+    return res;
+};
+```
+
+##### 寻找两个正序数组的中位数(4)
+- 双指针遍历两个数组
+```javascript
+/**
+ * @param {number[]} nums1
+ * @param {number[]} nums2
+ * @return {number}
+ */
+var findMedianSortedArrays = function(nums1, nums2) {
+    let mergeNums = new Array();
+    let count1 = 0;
+    let count2 = 0;
+    while (count1 < nums1.length && count2 < nums2.length) {
+        if (nums1[count1] <= nums2[count2]) {
+            mergeNums.push(nums1[count1]);
+            count1++;
+        } else {
+            mergeNums.push(nums2[count2]);
+            count2++;
+        }
+    }
+    if (count1 < nums1.length) {
+        while(count1 < nums1.length) {
+            mergeNums.push(nums1[count1]);
+            count1++;
+        }
+    } 
+    if (count2 < nums2.length) {
+        while (count2 < nums2.length) {
+            mergeNums.push(nums2[count2]);
+            count2++;
+        }
+    }
+    // console.log(mergeNums);
+    if (mergeNums.length % 2 == 0) {
+        let mid = parseInt(mergeNums.length / 2);
+        return (mergeNums[mid - 1] + mergeNums[mid]) / 2;
+    } else {
+        let mid = Math.floor(mergeNums.length / 2);
+        return parseFloat(mergeNums[mid]);
+    }
+};
+```
+- 二分查找
+```javascript
+/* 假设两个数组总长度为K，中位数就是第k(k = K/2 或 k/2 + 1)小的
+数。每一次查找数组A和数组B的前k/2个元素。选取其中较小的那个，从对应
+数组中删除(后移数组开头位置的坐标)。若A[k/2] < B[k/2]，除去A的前
+k/2个元素，在寻找在剩余的数中第k - k/2小的元素。每回减少相对于现在
+一般的元素，就实现了二分 */
+function find_kth_num(k, nums1, nums1_start, nums2, nums2_start) {
+    //递归返回条件
+    if (nums1_start >= nums1.length) {
+        return nums2[nums2_start + k - 1];
+    }
+    if (nums2_start >= nums2.length) {
+        return nums1[nums1_start + k - 1];
+    }
+    if (k == 1) {
+        // console.log(`n1_start = ${nums1_start}`);
+        // console.log(`n2_start = ${nums2_start}`);
+        // console.log(`n1_val = ${nums1[nums1_start]}`);
+        // console.log(`n2_val = ${nums2[nums2_start]}`);
+        return nums1[nums1_start] < nums2[nums2_start] ? nums1[nums1_start] : nums2[nums2_start];
+    }
+
+    let k_local = Math.floor(k / 2);
+    let nums1_mid = Math.min(nums1.length - 1, nums1_start + k_local - 1);
+    let nums2_mid = Math.min(nums2.length - 1, nums2_start + k_local - 1);
+    if (nums1[nums1_mid] <= nums2[nums2_mid]) {
+        k = k - (nums1_mid + 1 - nums1_start);
+        nums1_start = nums1_mid + 1;
+        // console.log(`nums1_start = ${nums1_start}`);
+        // console.log(k);
+        return find_kth_num(k, nums1, nums1_start, nums2, nums2_start);
+    } else {
+        k = k - (nums2_mid + 1 - nums2_start);
+        nums2_start = nums2_mid + 1;
+        // console.log(`nums2_start = ${nums2_start}`);
+        // console.log(k);
+        return find_kth_num(k, nums1, nums1_start, nums2, nums2_start);
+    }
+}
+
+
+var findMedianSortedArrays = function(nums1, nums2) {
+    // nums1 = [1, 2];
+    // nums2 = [1,2,3,4,5,6,7,8,9,10];
+    let total_length = nums1.length + nums2.length;
+    if (total_length % 2 == 0) {
+        let n1 = find_kth_num(parseInt(total_length / 2), nums1, 0, nums2, 0);
+        let n2 = find_kth_num(parseInt(total_length / 2) + 1, nums1, 0, nums2, 0);
+        return (n1 + n2) / 2;
+    } else {
+        let res = find_kth_num(Math.ceil(total_length / 2), nums1, 0, nums2, 0);
+        return parseFloat(res);
+    }
+    // find_kth_num(7, nums1, 0, nums2, 0);
+    // find_kth_num(8, nums1, 0, nums2, 0);
+    // console.log(n1);
+    // console.log(n2);
+};
+```
+
 ##### 合并两个有序链表(21)
 ```javascript
 //双指针合并有序数组
@@ -559,6 +705,38 @@ var connect = function(root) {
 };
 ```
 
+##### 填充每个节点的下一个右侧节点指针 II(117)
+```javascript
+var connect = function(root) {
+    if (!root) {
+        return root;
+    }
+    let queue = new Array();
+    let currentNode;
+    let currentLength;
+
+    queue.push(root);
+    while (queue.length) {
+        currentLength = queue.length;
+        for (let i = 0; i < currentLength; i++) {
+            currentNode = queue.shift();
+            if (i == currentLength - 1) {
+                currentNode.next = null;
+            } else {
+                currentNode.next = queue[0];
+            }
+            if (currentNode.left) {
+                queue.push(currentNode.left);
+            }
+            if (currentNode.right) {
+                queue.push(currentNode.right);
+            }
+        }
+    }
+    return root;
+};
+```
+
 ##### 对链表进行插入排序(147)
   ```javascript
   var insertionSortList = function(head) {
@@ -766,6 +944,76 @@ var connect = function(root) {
     }
   };
   ```
+
+##### 二叉树的最近公共祖先(236)
+- dfs
+```javascript
+function dfs(node, target, path) {
+    //递归返回条件
+    if (!node) {
+        return false;
+    }else if (node.val == target.val) {
+        // path.push(node);
+        return true;
+    }
+    path.push(node);
+    if (dfs(node.left, target, path)) {
+        return true;
+    }
+    if (dfs(node.right, target, path)) {
+        return true;
+    }
+    path.pop();
+    return false;
+} 
+
+function findAncestor(a1, a2, node) {
+    //a1.length >= a2.length
+    for (let i = a1.length - 1; i >= 0; i--) {
+        if (i >= a2.length && a1[i].val == node.val) { 
+            return node;
+        } else if (i < a2.length && a1[i].val == a2[i].val) {
+            return a1[i];
+        }
+    }
+}
+
+var lowestCommonAncestor = function(root, p, q) {
+    let p_path = new Array();
+    let q_path = new Array();
+    let res;
+
+    dfs(root, p, p_path);
+    dfs(root, q, q_path);
+    // console.log(p_path[0].val);
+    // console.log(q_path[0].val);
+    
+    if (p_path.length >= q_path.length) {
+        res = findAncestor(p_path, q_path, q);
+    } else {
+        res = findAncestor(q_path, p_path, p);
+    }
+    return res;
+};
+```
+- 后序遍历
+```javascript
+var lowestCommonAncestor = function(root, p, q) {
+    //后序遍历
+    if (root == null || root == p || root == q) {
+        return root;
+    }
+    let left = lowestCommonAncestor(root.left, p, q);
+    let right = lowestCommonAncestor(root.right, p, q);
+    if (!left) {
+        return right;
+    }
+    if (!right) {
+        return left;
+    }
+    return root;
+};
+```
 
 ##### 字符串解码(394)
   - 栈解法
