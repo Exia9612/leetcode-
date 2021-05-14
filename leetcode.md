@@ -145,6 +145,90 @@ var findMedianSortedArrays = function(nums1, nums2) {
 };
 ```
 
+##### 最长回文子串(5)
+- 动态规划
+```javascript
+var longestPalindrome = function(s) {
+    //dp
+    let maxLength = 1;
+    let begin = 0;;
+    const dp = new Array(s.length).fill(0).map(i=>new Array(s.length).fill(false));
+
+    for (let i = 0; i < s.length; i++) {
+        dp[i][i] = true;
+    }
+
+    for (let currentLength = 2; currentLength <= s.length; currentLength++) {
+        for (let i = 0; i < s.length; i++) {
+            let j = i + currentLength - 1;
+            if (j >= s.length) {
+                break;
+            }
+            if (s[i] == s[j]) {
+                // 'aa' 或者只有一个字母时其两边的字母相等也直接返回true
+                if (j - i < 3) {
+                    dp[i][j] = true;
+                    begin = maxLength < j - i + 1 ? i : begin;
+                    maxLength = Math.max(maxLength, j - i + 1);
+                } else {
+                    dp[i][j] = dp[i+1][j-1];
+                    maxLength = dp[i+1][j-1] ? Math.max(maxLength, j - i + 1) : maxLength;
+                    begin = dp[i+1][j-1] ? i : begin;
+                }
+            }
+        }
+    }
+    // console.log(begin);
+    // console.log(maxLength);
+    return s.substring(begin, begin + maxLength);
+};
+```
+
+##### 三数之和(15)
+- 排序+双指针
+```javascript
+var threeSum = function(nums) {
+    // nums = [-1,0,1,2,-1,-4,-2,-3,3,0,4]
+    let res = new Array();
+    if (nums.length < 3) {
+       return res;
+    }
+    nums.sort((a, b) => a - b);
+    // console.log(nums);
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] > 0) {
+            //因为已经排序好，若第i位置的数大于0，后面都为整数，不存在三数之和为0
+            return res;
+        }
+        if (i > 0 && nums[i - 1] == nums[i]) {
+            //跳过重复元素
+            continue;
+        }
+        let target = 0 - nums[i];
+        let left = i + 1;
+        let right = nums.length - 1;
+        while (left < right) {
+            let tempSum = nums[left] + nums[right];
+            if (tempSum < target) {
+                left++;
+            } else if (tempSum > target) {
+                right--;
+            } else {
+                let tempArray = [nums[i], nums[left], nums[right]];
+                res.push(tempArray);
+                left++;
+                right--;
+                while (left < right && nums[left] == nums[left - 1] && nums[right] == nums[right + 1]) {
+                    left++;
+                    right--;
+                }
+            }
+        }
+    }
+    return res;
+};
+```
+
 ##### 合并两个有序链表(21)
 ```javascript
 //双指针合并有序数组
@@ -251,6 +335,139 @@ var mergeKLists = function(lists) {
     }
 
     return dummyHead.next;
+};
+```
+
+##### 搜索旋转排序数组(33)
+- 二分查找
+```javascript
+var search = function(nums, target) {
+    if (nums.length == 0) {
+        return -1;
+    }
+    if (nums.length == 1) {
+        return nums[0] == target ? 0 : -1;
+    }
+    let left = 0;
+    let right = nums.length - 1;
+    while (left <= right) {
+        let mid = parseInt((left + right) / 2);
+        if (nums[mid] == target) {
+            return mid;
+        }
+        if (nums[left] <= nums[mid]) {
+            //mid左面部分是有序数组
+            if (target >= nums[left] && target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        } else {
+            //mid右边区间是有序的
+            if (target > nums[mid] && target <= nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    }
+    return -1;
+};
+```
+
+##### 缺失的第一个正数(41)
+```javascript
+var firstMissingPositive = function(nums) {
+    //时间复杂度O(n)靠哈希算法
+    //空间常数级别靠改变已有数组
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] <= 0) {
+            nums[i] = nums.length + 1;
+        }
+    }
+    // console.log(nums);
+    for (let ele of nums) {
+        ele = Math.abs(ele);
+        if (ele >= 1 && ele <= nums.length && nums[ele - 1] > 0) {
+            nums[ele - 1] = -nums[ele - 1];
+        }
+    }
+    // console.log(nums);
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] > 0) {
+            return i + 1;
+        }
+    }
+    // console.log(nums);
+    return nums.length + 1;
+};
+```
+
+##### 最大子序和(53)
+- 动态规划
+```javascript
+var maxSubArray = function(nums) {
+    /* 若前i-1项的最大和小于0，不管nums[i]是否大于0，都应该取nums[i-1]得到前i项最大和；若前i-1项大于零，前i项的最大和应该加上num[i]，不管nums[i]是否大于零 */
+    let sum = nums[0];
+    let max = sum;
+    for (let i = 1; i < nums.length; i++) {
+        sum = Math.max(sum + nums[i], nums[i]);
+        max = Math.max(max, sum);
+    }
+    return max;
+};
+```
+
+##### 爬楼梯(70)
+- 构建二叉树，中序遍历
+```javascript
+function TreeNode(val, left, right) {
+  this.val = (val===undefined ? 0 : val)
+  this.left = (left===undefined ? null : left)
+  this.right = (right===undefined ? null : right)
+}
+
+var climbStairs = function(n) {
+  //中序遍历
+  //结果正确，但超时
+  let root = new TreeNode(0);
+  let res = 0;
+  let stack = new Array();
+  let currentNode = root;
+
+  while (stack.length || currentNode) {
+      while (currentNode) {
+          if (currentNode.val == n) {
+              res++;
+              break;
+          } else if (currentNode.val > n) {
+              break;
+          } else {
+              stack.push(currentNode);
+              currentNode.left = new TreeNode(currentNode.val + 1);
+              currentNode = currentNode.left;
+          }
+      }
+      currentNode = stack.pop();
+      if (currentNode) {
+          currentNode.right = new TreeNode(currentNode.val + 2);
+          currentNode = currentNode.right;
+      }
+  }
+
+  return res;
+};
+```
+- 动态规划
+```javascript
+var climbStairs = function(n) {
+    let dp = new Array();
+    dp[0] = 1;
+    dp[1] = 1;
+    for (let i = 2; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
 };
 ```
 
@@ -774,6 +991,28 @@ var connect = function(root) {
   };
   ```
 
+##### 乘积最大子数组(152)
+- 动态规划
+```javascript
+var maxProduct = function(nums) {
+    /*
+        需要两个值max和min，max代表以nums[i]结尾的乘积最大子数组
+        的乘积，min代表以nums[i]结尾的乘积最小的子数组的乘积
+    */
+    let max = nums[0];
+    let min = nums[0];
+    let res = max;
+    for (let i = 1; i < nums.length; i++) {
+        let currentMax = max;
+        let currentMin = min;
+        max = Math.max(nums[i], currentMax * nums[i], currentMin * nums[i]);
+        min = Math.min(nums[i], currentMax * nums[i], currentMin * nums[i]);
+        res = Math.max(res, max);
+    }
+    return res;
+};
+```
+
 ##### 岛屿数量(200)
   - BFS
     ```javascript
@@ -1015,6 +1254,153 @@ var lowestCommonAncestor = function(root, p, q) {
 };
 ```
 
+##### 最长递增子序列(300)
+- 动态规划(O(n2))
+```javascript
+var lengthOfLIS = function(nums) {
+    let map = new Map();
+    let res = 1;
+    for (let i = 0; i < nums.length; i++) {
+        let currentEle = nums[i];
+        let currentLength = 0;
+        for (let j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                currentLength = Math.max(currentLength, map.get(j));
+            }
+        }
+        currentLength += 1;
+        map.set(i, currentLength);
+        res = Math.max(res, currentLength);
+    }
+    return res;
+};
+```
+- 动态规划(O(nlogn))
+```javascript
+function findEle(target, array, start, end) {
+    //在array数组中找到比targrt大的最小元素的索引
+    let pos = 0;
+    while (start <= end) {
+        let mid = parseInt((start + end) / 2);
+        if (array[mid] == target) {
+            return mid;
+        } else if (array[mid] < target) {
+            pos = mid;
+            start = mid + 1;
+            //console.log(`Less: mid=${mid}, start=${start}, end=${end}, array[mid]=${array[mid]}`);
+        } else {
+            end = mid - 1;
+            //console.log(`More: mid=${mid}, start=${start}, end=${end}, array[mid]=${array[mid]}`);
+        }
+    }
+    return pos + 1;
+}
+
+var lengthOfLIS = function(nums) {
+    //nums = [-147,-171,-584,590,501,13,489,-938,396,-544,-229,697,157,-933];
+    let array = new Array(nums.length + 1);
+    let length = 1;
+    array[0] = Number.MIN_SAFE_INTEGER;
+    array[1] = nums[0];
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] > array[length]) {
+            array[length + 1] = nums[i];
+            length++;
+            //console.log(`push: ${array}`);
+        } else {
+            let pos = findEle(nums[i], array, 0, length);
+            array[pos] = nums[i];
+            //console.log(`find: ${array}`);
+        }
+    }
+    return length;
+};
+```
+
+##### 俄罗斯套娃信封问题(354)
+- 动态规划(O(n2))
+```javascript
+// 是问题最长递增子序列(300)的二维化，解法相同
+var maxEnvelopes = function(envelopes) {
+    //envelopes = [[2,100],[3,200],[4,300],[5,500],[5,400],[5,250],[6,370],[6,360],[7,380]];
+    // 排序，然后遍历，O(n2)
+    envelopes = envelopes.sort((x, y) => {
+        if (x[0] != y[0]) {
+            return x[0] - y[0];
+        } else {
+            return x[1] - y[1];
+        }
+    })
+    //console.log(envelopes);
+    let resLength = 1;
+    let dp = new Array(envelopes.length).fill(1);
+    for (let i = 0; i < envelopes.length; i++) {
+        //let currentEnvelop = envelopes[i];
+        for (let j = 0; j < i; j++) {
+            if (envelopes[i][0] > envelopes[j][0] && envelopes[i][1] > envelopes[j][1]) {
+                //当前信封大于envelops[j]对应的信封
+                if (dp[j] + 1 > dp[i]) {
+                    dp[i] = dp[j] + 1;
+                }
+            }
+        }
+        resLength = Math.max(resLength, dp[i]);
+    }
+    return resLength;
+};
+```
+
+- 动态规划(O(nlogn))
+```javascript
+function findPos(target, array, start, end) {
+    let pos = 0;
+    while (start <= end) {
+        let mid = parseInt((start + end) / 2);
+        if (array[mid] == target) {
+            return mid;
+        } else if (array[mid] < target) {
+            pos = mid;
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return pos + 1;
+}
+
+var maxEnvelopes = function(envelopes) {
+    //envelopes = [[2,100],[3,200],[4,300],[5,500],[5,400],[5,250],[6,370],[6,360],[7,380]];
+    envelopes = envelopes.sort((x, y) => {
+        // 先按宽度升序排序，在按高度降序排序
+        if (x[0] != y[0]) {
+            return x[0] - y[0];
+        } else {
+            return y[1] - x[1];
+        }
+    })
+    //console.log(envelopes);
+    let res= 1;
+    let height = new Array();
+    height[0] = 0;
+    height[1] = envelopes[0][1];
+    for (let i = 0; i < envelopes.length; i++) {
+        /* 
+            在排序好的数组中，只要下一个元素的高度大于height的结元素
+            就一定可以放下前一个信封，(按照排序规则这时下一个元素的
+            宽度也必定大于结尾元素的宽度)
+        */
+        if (envelopes[i][1] > height[height.length - 1]) {
+            res++;
+            height.push(envelopes[i][1]);
+        } else {
+            let pos = findPos(envelopes[i][1], height, 0, height.length - 1);
+            height[pos] = envelopes[i][1];
+        }
+    }
+    return res;
+};
+```
+
 ##### 字符串解码(394)
   - 栈解法
   ```javascript
@@ -1135,6 +1521,44 @@ var lowestCommonAncestor = function(root, p, q) {
   };
   ```
 
+##### 最长递增子序列(673)
+```javascript
+var findNumberOfLIS = function(nums) {
+    // nums = [2,2,2,2,2];
+    let dp = new Array(nums.length).fill(1);
+    let count = new Array(nums.length).fill(1);
+    let res = 1;
+    for (let i = 0; i < nums.length; i++) {
+        let currentEle = nums[i];
+        let currentLength = 1;
+        for (let j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                //currentLength = Math.max(currentLength, dp[j]);
+                if (dp[j] + 1 > dp[i]) {
+                    // 说明dp[i]应该增加1
+                    dp[i] = dp[j] + 1;
+                    count[i] = count[j];
+                } else if (dp[j] + 1 == dp[i]) {
+                    count[i] += count[j];
+                }   
+            }
+        }
+        //currentLength += 1;
+        //dp[i] = currentLength;
+        res = Math.max(res, dp[i]);
+    }
+    // console.log(dp);
+    // console.log(res);
+    let result = 0;
+    for (let i = 0; i < dp.length; i++) {
+        if (dp[i] == res) {
+            result += count[i];
+        }
+    }
+    return result;
+};
+```
+
 ##### 图像渲染(733)
   - BFS
   ```javascript
@@ -1186,6 +1610,57 @@ var lowestCommonAncestor = function(root, p, q) {
   };
   ```
 
+##### 使用最小花费爬楼梯(749)
+- 动态规划
+```javascript
+/**
+ * @param {number[]} cost
+ * @return {number}
+ */
+var minCostClimbingStairs = function(cost) {
+    let destination = cost.length;
+    let dp = new Array(destination).fill(0);
+    dp[0] = cost[0];
+    dp[1] = cost[1];
+    for (let i = 2; i < destination; i++) {
+        dp[i] = Math.min(dp[i - 1], dp[i - 2]) + cost[i];
+    }
+    return Math.min(dp[destination - 1], dp[destination - 2]);
+};
+```
+
+##### 使序列递增的最小交换次数(801)
+- 动态规划
+```javascript
+var minSwap = function(A, B) {
+    /* n1:不交换i-1位的情况下，前i-1位实现严格递增的交换次数
+       s1:交换i-1位的情况下，前i-1位实现严格递增的交换次数 */
+    let n1 = 0;
+    //当A,B仅有一位时，交换A[0]和B[0]可以实现两个数组的严格递增
+    let s1 = 1;
+    for (let i = 1; i < A.length; i++) {
+        let n2 = Number.MAX_SAFE_INTEGER;
+        let s2 = Number.MAX_SAFE_INTEGER;
+        if (A[i - 1] < A[i] && B[i - 1] < B[i]) {
+            //在不交换前i-1位已经是严格递增数组的情况下，第i位不必交换即可实现严格递增
+            n2 = n1;
+            /* 在不交换前i-1位已经是严格递增数组的情况下，s2有两种可能。
+               交换第i位之后，数组依然严格递增，此时s2=n1+1，下面的条件判断会判断该情况
+               交换第i位之后，数组不是严格递增，此时必须交换i-1位，才能实现严格递增 */
+            s2 = s1 + 1;
+        }
+        if (A[i - 1] < B[i] && B[i - 1] < A[i]) {
+            //前一位只要交换一下就可以实现不交换i位实现数组严格递增
+            n2 = Math.min(n2, s1);
+            s2 = Math.min(s2, n1 + 1);
+        }
+        n1 = n2;
+        s1 = s2;
+    }
+    return Math.min(n1, s1);
+};
+```
+
   ##### 钥匙和房间(841)
   - DFS
     ```javascript
@@ -1213,6 +1688,45 @@ var lowestCommonAncestor = function(root, p, q) {
       return keys.size == rooms.length ? true : false;
     };
     ```
+
+##### 环形子数组的最大和(918)
+- 动态规划(O(n))
+```javascript
+var maxSubarraySumCircular = function(nums) {
+    /* 
+        环形子数组的最大和分为两种情况
+        1 子数组不是环形数组，直接包含在nums中
+        2 子数组是环形数组，一定包含开头元素A[0]和结尾元素A[length - 1]
+    */
+    if (nums.length == 1) {
+        return nums[0];
+    }
+    // 先找非环形数组最大和
+    let max = nums[0];
+    let res = max;
+    let sum = nums[0];
+    for (let i = 1; i < nums.length; i++) {
+        sum += nums[i];
+        max = Math.max(nums[i], max + nums[i]);
+        res = Math.max(res, max);
+    }
+    // 找环形数组的最大和
+    /* 
+        若答案为环形数组，出去开头和结尾元素必须添加外，在[1, length-2]
+        这个区间内必然包含一段连续和为负数的区间，导致整个数组的和sum必须
+        减去该段区间的负数和
+        同样的思路也可以用在寻找最大和上，只不过当答案是环形数组时，必须
+        寻找中间区间的最小值
+     */
+    let last = nums[1];
+    let min = nums[1];
+    for (let i = 2; i < nums.length - 1; i++) {
+        min = Math.min(nums[i], nums[i] + min);
+        last = Math.min(last, min);
+    }
+    return Math.max(res, sum - last);
+};
+```
 
 ##### 数组中的逆序对(剑指offer 51)
 ```javascript
