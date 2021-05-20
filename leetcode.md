@@ -1401,6 +1401,78 @@ var maxEnvelopes = function(envelopes) {
 };
 ```
 
+##### 矩形区域不超过 K 的最大数值和(363)
+- 动态规划(On2mlogm)
+```javascript
+/* 
+    思路与最大子矩阵相同，都是二维转一维
+    该题目是寻找区间和sl - si >= k
+    sl:当前区间和；si:之前的区间和
+    遍历sl，同时存储之前的si，在之前的
+    si中找到比sl-k大的最小的那个si
+*/
+function compare(v1, v2) {
+    if (v1 < v2) {
+        return - 1;
+    } else if (v1 > v2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+function findEle(array, target) {
+    // 在array中找到刚好比target大的元素或等于target的元素
+    array.sort(compare);
+    let start = 0;
+    let end = array.length - 1;
+    let pos = array.length;
+    while (start <= end) {
+        let mid = parseInt((start + end) / 2);
+        if (array[mid] == target) {
+            return mid;
+        } else if (array[mid] < target) {
+            start = mid + 1;
+        } else {
+            pos = mid;
+            end = mid - 1;
+        }
+    }
+    return pos;
+}
+
+var maxSumSubmatrix = function(matrix, k) {
+    let M = matrix.length;
+    let N = matrix[0].length;
+    let res = Number.MIN_SAFE_INTEGER;
+    let tempArray = new Array(N);
+
+    for (let i = 0; i < M; i++) {
+        tempArray.fill(0);
+        for (let j = i; j < M; j++) {
+            for (let l = 0; l < N; l++) {
+                tempArray[l] += matrix[j][l];
+            }
+            let sums = new Array();
+            sums[0] = 0;
+            let tempSum = 0;
+            for (let p = 0; p < N; p++) {
+                tempSum += tempArray[p]
+                let target = tempSum - k;
+                let pos = findEle(sums, target);
+                if (pos < sums.length) {
+                    res = Math.max(res, tempSum - sums[pos]);
+                }
+                sums.push(tempSum);
+                //console.log(pos);
+            }
+        }
+    }
+
+    return res;
+};
+```
+
 ##### 字符串解码(394)
   - 栈解法
   ```javascript
@@ -1783,3 +1855,49 @@ var reversePairs = function(nums) {
 };
 
 ``` 
+
+##### 最大子矩阵(17.24)
+- 二维转换为一维
+``` javascript
+var getMaxMatrix = function(matrix) {
+    // 二维转一维
+    let M = matrix.length;
+    let N = matrix[0].length;
+    let res = new Array(4).fill(0);
+    let tempArray = new Array(N);
+    let maxValue = matrix[0][0];
+
+    for (let i = 0; i < M; i++) {
+        tempArray.fill(0);
+        for (let j = i; j < M; j++) {
+            for (let l = 0; l < N; l++) {
+                // 计算i-j行的累加和 
+                tempArray[l] += matrix[j][l];
+            }
+            // 在tempArray中找最大子序
+            let tempSum = tempArray[0];
+            let tempStart = [i, 0];
+            //let tempEnd = [j, 0];
+            for (let k = 1; k < N; k++) {
+                if (tempSum >= 0) {
+                    tempSum += tempArray[k];
+                } else {
+                    // tempSum < 0
+                    tempSum = tempArray[k];
+                    // 更新的开头横坐标用应该是i，因为是累加i-j行的数值，随意开头的数据在第i行
+                    tempStart = [i, k];
+                    //tempEnd = [j, k];
+                }
+                if (tempSum > maxValue) {
+                    res[0] = tempStart[0];
+                    res[1] = tempStart[1];
+                    res[2] = j;
+                    res[3] = k;
+                    maxValue = tempSum;
+                }
+            }
+        }
+    }
+    return res;
+};
+```
