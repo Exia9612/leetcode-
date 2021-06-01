@@ -1013,6 +1013,86 @@ var maxProduct = function(nums) {
 };
 ```
 
+##### 打家劫舍(198)
+- 动态规划
+```javascript
+var rob = function(nums) {
+    /* 
+    对于第n位的数字来说dp[n] = MAX(tempMax, dp[n - 2] + nums[n])
+    下一轮的dp[n-2]是上一轮的tempMax
+    */
+    if (nums.length <= 1) {
+        return nums[0];
+    }
+    // tempMax:截止到当前位前一位时，可以获得的最大金额
+    // dp:截止到当前位前两位时， 可以获得的最大金额
+    let tempMax = Math.max(nums[0], nums[1]);
+    let dp = nums[0];
+    for (let i = 2; i < nums.length; i++) {
+        let temp = tempMax;
+        tempMax = Math.max(tempMax, dp + nums[i]);
+        dp = temp;
+    }
+    return tempMax;
+};
+```
+
+- 动态规划
+```javascript
+/*
+注意到若{nums}nums 中不存在某个元素 x，则选择任一小于
+x 的元素不会影响到大于 x 的元素的选择。因此我们可以将nums排
+序后，将其划分成若干连续子数组，子数组内任意相邻元素之差不超过1。对
+每个子数组按照方法一的动态规划过程计算出结果，累加所有结果即为答案。
+*/
+function compare(v1, v2) {
+    if (v1 < v2) {
+        return -1;
+    } else if (v1 > v2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+function rob(nums) {
+    if (nums.length == 1) {
+        return nums[0];
+    }
+    let tempMax = Math.max(nums[0], nums[1]);
+    let dp = nums[0];
+    for (let i = 2; i < nums.length; i++) {
+        let temp = tempMax;
+        tempMax = Math.max(tempMax, dp + nums[i]);
+        dp = temp;
+    }
+    return tempMax;
+}
+
+var deleteAndEarn = function(nums) {
+    nums.sort(compare);
+    let subNums = [nums[0]];
+    let res = 0;
+    for (let i = 1; i < nums.length; i++) {
+        // console.log(subNums);
+        if (nums[i] == nums[i - 1]) {
+            // 当前元素与前一个元素相等，将它们的累加
+            subNums[subNums.length - 1] += nums[i];
+        } else if (nums[i] == nums[i - 1] + 1) {
+            // 当前元素比前一个元素大1，将当前元素添加到数组中
+            subNums.push(nums[i]);
+        } else {
+            // 获得一个基于nums的子数组，数组中的元素是元素的和
+            // 相邻元素是互相之间差值为1
+            res += rob(subNums);
+            subNums = [nums[i]];
+        }
+    }
+    res += rob(subNums);
+    return res;
+};
+```
+
 ##### 岛屿数量(200)
   - BFS
     ```javascript
@@ -1093,6 +1173,35 @@ var maxProduct = function(nums) {
       return res;
     };
     ```
+
+##### 打家劫舍II(213)
+- 动态规划
+```javascript
+function fn(nums, start, end) {
+    let tempMax = Math.max(nums[start], nums[start + 1]);
+    let dp = nums[start];
+    for (let i = start + 2; i < end; i++) {
+        let temp = tempMax;
+        tempMax = Math.max(tempMax, dp + nums[i]);
+        dp = temp;
+    }
+    return tempMax;
+}
+
+var rob = function(nums) {
+    // 若偷窃第一栋房屋，不遍历最后一个房屋；若偷窃最后一个房屋，不遍历第一个房屋
+    // 边界条件
+    if (nums.length == 1) {
+        return nums[0];
+    } else if (nums.length == 2) {
+        return Math.max(nums[0], nums[1]);
+    } else {
+        let r1 = fn(nums, 0, nums.length - 1);
+        let r2 = fn(nums, 1, nums.length);
+        return Math.max(r1, r2);
+    }
+};
+```
 
 ##### 用队列实现栈(225)
   - 单队列实现栈
@@ -1682,6 +1791,40 @@ var findNumberOfLIS = function(nums) {
   };
   ```
 
+##### 删除并获得点数(740)
+- 动态规划
+```javascript
+var deleteAndEarn = function(nums) {
+    let maxVal = 0;
+    for (const val of nums) {
+        maxVal = Math.max(maxVal, val);
+    }
+    const sum = new Array(maxVal + 1).fill(0);
+    for (const val of nums) {
+        sum[val] += val;
+    }
+    return rob(sum);
+};
+
+const rob = (nums) => {
+    /*
+        将本问题转化为打家劫舍的问题。
+        对于数组nums，创建另一个数组sums。nums中相同的元素
+        val，sums[val]是所有val总和，因此sums的长度是nums
+        最大元素的大小。之后就可以采取打家劫舍的解法，选择了
+        sums[i]就不能选择sums[i]的前一个和后一个元素
+    */
+    const size = nums.length;
+    let first = nums[0], second = Math.max(nums[0], nums[1]);
+    for (let i = 2; i < size; i++) {
+        let temp = second;
+        second = Math.max(first + nums[i], second);
+        first = temp;
+    }
+    return second;
+}
+```
+
 ##### 使用最小花费爬楼梯(749)
 - 动态规划
 ```javascript
@@ -1797,6 +1940,77 @@ var maxSubarraySumCircular = function(nums) {
         last = Math.min(last, min);
     }
     return Math.max(res, sum - last);
+};
+``` 
+
+##### 最长的斐波那契子序列的长度(873)
+- 动态规划(O(n2))
+```javascript
+function findEle(arr, start, end, target) {
+    while (start <= end) {
+        let mid = parseInt((start + end) / 2);
+        if (arr[mid] == target) {
+            return mid;
+        } else if (arr[mid] < target) {
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return -1;
+}
+
+var lenLongestFibSubseq = function(arr) {
+    let length = 0;
+    for (let i = 0; i < arr.length - 2; i++) {
+        let currentEle = arr[i];
+        for (let j = i + 1; j < arr.length; j++) {
+            let tempLength = 2;
+            let currentPos = j;
+            let target = arr[j] + currentEle;
+            let nextPos = findEle(arr, currentPos + 1, arr.length - 1, target);
+            while (nextPos != -1) {
+                tempLength++;
+                target = target + arr[currentPos];
+                currentPos = nextPos;
+                nextPos = findEle(arr, currentPos + 1, arr.length - 1, target);
+            }
+            if (tempLength > 2) {
+            length = Math.max(length, tempLength);
+        }
+        }
+    }
+    return length;
+};
+```
+- 动态规划(O(n2))
+```javascript
+/*
+    改进了中间的while循环，采用map可以在O(n)的时间内找到元素
+*/
+var lenLongestFibSubseq = function(arr) {
+    let length = 0;
+    let map = new Map();
+
+    for (let i = 0; i < arr.length; i++) {
+        map.set(arr[i], i);
+    }
+    for (let i = 0; i < arr.length - 2; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+            let tempLength = 2;
+            let target = arr[i] + arr[j];
+            let lastPos = j;
+            let currentPos = map.get(target);
+            while (currentPos) {
+                tempLength++;
+                target = target + arr[lastPos];
+                lastPos = currentPos;
+                currentPos = map.get(target);
+            }
+            length = Math.max(tempLength, length);
+        }
+    }
+    return length > 2 ? length : 0;
 };
 ```
 

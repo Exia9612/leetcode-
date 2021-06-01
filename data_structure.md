@@ -20,6 +20,7 @@ class heap {
   }
 
   _buildHeap () {
+    // **从最后一个非叶子节点向前遍历每一个节点即可**
     for (let i = Math.ceil(this.heapsize / 2) - 1; i >= 0; i--) {
       this.heapify(i);
     }
