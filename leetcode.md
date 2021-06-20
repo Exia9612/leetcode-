@@ -41,6 +41,105 @@ var twoSum = function(nums, target) {
 };
 ```
 
+##### 两数相加(2)
+- 双指针
+```javascript
+var addTwoNumbers = function(l1, l2) {
+    let resNode = new ListNode();
+    let head = resNode;
+    // 是否需要进位
+    let flag = false;
+    while (l1 != null && l2 != null) {
+        resNode.next = new ListNode();
+        resNode = resNode.next;
+        let currentSum = l1.val + l2.val;
+        if (flag) {
+            currentSum += 1;
+            flag = false;
+        }
+        if (currentSum >= 10) {
+            resNode.val = currentSum % 10;
+            flag = true;
+        } else {
+            resNode.val = currentSum;
+        }
+        l1 = l1.next;
+        l2 = l2.next;
+    }
+    while (l1 != null) {
+        resNode.next = new ListNode();
+        resNode = resNode.next;
+        let currentSum = l1.val;
+        if (flag) {
+            currentSum += 1;
+            flag = false;
+        }
+        if (currentSum >= 10) {
+            resNode.val = currentSum % 10;
+            flag = true;
+        } else {
+            resNode.val = currentSum;
+        }
+        l1 = l1.next;
+    }
+    while (l2 != null) {
+        resNode.next = new ListNode();
+        resNode = resNode.next;
+        let currentSum = l2.val;
+        if (flag) {
+            currentSum += 1;
+            flag = false;
+        }
+        if (currentSum >= 10) {
+            resNode.val = currentSum % 10;
+            flag = true;
+        } else {
+            resNode.val = currentSum;
+        }
+        l2 = l2.next;
+    }
+    if (flag) {
+        resNode.next = new ListNode(1);
+    }
+    return head.next;
+};****
+```
+
+##### 无重复字符的最长子串(3)
+- 滑动窗口/双指针
+```javascript
+/*
+    set:一个集合，存储当前窗口长度内已有的字符
+    每一次将右指针向后加1，并查找集合内是否右有指针指向的字符；
+    若有删除左指针指向的字符并递增左指针直到集合中不包含右指针指向的字符
+*/
+var lengthOfLongestSubstring = function(s) {
+    if (s.length == 0) {
+        return 0;
+    }
+
+    let res = 1;
+    let set = new Set();
+    let left = 0;
+    let right = 1;
+    set.add(s[0]);
+    while (right < s.length) {
+        if (set.has(s[right])) {
+            // 之前的集合中有该元素
+            while (set.has(s[right]) && left <= right) {
+                set.delete(s[left]);
+                left++;
+            }
+        } 
+        // 添加当前的末尾元素
+        set.add(s[right]);
+        res = Math.max(res, right - left + 1);
+        right++;
+    }
+    return res;
+};
+```
+
 ##### 寻找两个正序数组的中位数(4)
 - 双指针遍历两个数组
 ```javascript
@@ -229,6 +328,54 @@ var threeSum = function(nums) {
 };
 ```
 
+##### 四数之和(18)
+- 排序 + 双指针
+```javascript
+/*
+    该题目解法与三数之和基本相同，只是增加了一层循环
+*/
+var fourSum = function(nums, target) {
+    let res = [];
+    if (nums.length < 4) {
+        // 元素数量小于答案要求
+        return res;
+    }
+    nums.sort((a, b) => a - b);
+    for (let i = 0; i < nums.length - 3; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) {
+            // 去除以某一元素开头的重复元素
+            continue;
+        }
+        let currentTargetI = target - nums[i];
+        for (let j = i + 1; j < nums.length - 2; j++) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) {
+                // 第二个元素应该取排序后最右边的,即第一个与下一个元素不同的元素
+                continue;
+            }
+            let currentTargetJ = currentTargetI - nums[j];
+            let left = j + 1;
+            let right = nums.length - 1;
+            while (left < right) {
+                if (nums[left] + nums[right] > currentTargetJ) {
+                    right--;
+                } else if (nums[left] + nums[right] < currentTargetJ) {
+                    left++;
+                } else {
+                    res.push([nums[i], nums[j], nums[left], nums[right]]);
+                    left++;
+                    right--;
+                    while (left < right && nums[left] == nums[left - 1] && nums[right] == nums[right + 1]) {
+                        left++;
+                        right--;
+                    }
+                }
+            }
+        }
+    }
+    return res;
+};
+```
+
 ##### 合并两个有序链表(21)
 ```javascript
 //双指针合并有序数组
@@ -338,6 +485,36 @@ var mergeKLists = function(lists) {
 };
 ```
 
+##### 最长有效括号(32)
+- 栈
+```javascript
+var longestValidParentheses = function(s) {
+    /* 
+        未解决边界条件，在stack中插入-1
+        遇见(，往stack中插入该左括号的坐标，遇见)时，弹出stack的顶元素，代表匹配当前)的第一个(坐标
+        当前)坐标减去上一个未被匹配的(的坐标，就是当前的最长有效括号的长度
+    */
+    let length = 0;
+    let stack = new Array();
+    stack.push(-1);
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] == '(') {
+            stack.push(i);
+        } else {
+            stack.pop();
+            if (stack.length) {
+                // stack不为空
+                length = Math.max(length, i - stack[stack.length - 1]);
+            } else {
+                // stack为空
+                stack.push(i);
+            }
+        }
+    }
+    return length;
+};
+```
+
 ##### 搜索旋转排序数组(33)
 - 二分查找
 ```javascript
@@ -403,6 +580,98 @@ var firstMissingPositive = function(nums) {
 };
 ```
 
+##### 跳跃游戏 II(45)
+- 贪心算法
+```javascript
+/*
+    每回在能跳跃的范围内寻找下一次能到达最远未知的坐标(nums[i] + i)
+*/
+var jump = function(nums) {
+    let length = nums.length;
+    let end = 0;
+    let maxPosition = 0; 
+    let steps = 0;
+    for (let i = 0; i < length - 1; i++) {
+        maxPosition = Math.max(maxPosition, i + nums[i]); 
+        if (i == end) {
+            end = maxPosition;
+            steps++;
+        }
+    }
+    return steps;
+}
+```
+
+##### 全排列(46)
+- 回溯算法(dfs/递归)
+```javascript
+function dfs(nums, currentArray, used, res) {
+    if (currentArray.length == nums.length) {
+        /*
+            res.push(new Array(...currentArray))执行深复制时，
+            当currentArray只有一个元素时，new Array()会把结构后的
+            值当作新数组的元素个数。当只有一个元素时程序执行结果不正确
+         */
+        res.push([...currentArray]);
+        return;
+    }
+    for (let i = 0; i < nums.length; i++) {
+        if (!used[i]) {
+            currentArray.push(nums[i]);
+            used[i] = true;
+            dfs(nums, currentArray, used, res);
+            used[i] = false;
+            currentArray.pop();
+        }
+    }
+}
+
+var permute = function(nums) {
+    // 回溯算法(深度优先搜索/递归)
+    // 标记nums数组中哪一为用过
+    let used = new Array(nums.length).fill(false);
+    let res = [];
+    dfs(nums, [], used, res);
+    return res;
+}; 
+```
+
+##### 全排列II(47)
+- dfs
+```javascript
+function dfs(array, map, length, res) {
+    if (array.length == length) {
+        res.push([...array]);
+        return;
+    }
+    for (let key of map.keys()) {
+        if (map.get(key) !== 0) {
+            let value = map.get(key);
+            array.push(key);
+            map.set(key, --value);
+            dfs(array, map, length, res);
+            map.set(key, ++value);
+            array.pop();
+        }
+    }
+}
+
+var permuteUnique = function(nums) {
+    let res = [];
+    // 存放nums中各个数字出现的次数
+    let map = new Map();
+    for (let ele of nums) {
+        if (map.has(ele)) {
+            map.set(ele, map.get(ele) + 1);
+        } else {
+            map.set(ele, 1);
+        }
+    }
+    dfs([], map, nums.length, res);
+    return res;
+};
+```
+
 ##### 最大子序和(53)
 - 动态规划
 ```javascript
@@ -415,6 +684,43 @@ var maxSubArray = function(nums) {
         max = Math.max(max, sum);
     }
     return max;
+};
+```
+
+##### 合并区间(56)
+- 排序
+``` javascript
+var merge = function(intervals) {
+    // 排序区间内元素，先按第一个元素从小到大，再按第二个元素从小到大
+    intervals.sort((a1, a2) => {
+        if (a1[0] < a2[0]) {
+            return -1;
+        } else if (a1[0] > a2[0]) {
+            return 1;
+        } else {
+            return a1[1] - a2[1];
+        }
+    });
+    let uniqIntervals = intervals.filter((item, index, array) => {
+        if (index == array.length - 1) {
+            return item;
+        } else if (item[0] != array[index + 1][0]) {
+            return item;
+        }
+    });
+    let res = [uniqIntervals[0]];
+    for (let i = 1; i < uniqIntervals.length; i++) {
+        let currentInterval = res[res.length - 1];
+        if (currentInterval[1] >= uniqIntervals[i][0]) {
+            // 前一个区间的上限大于等于后一个区间的下限，合并区间
+            // 且需要更新res中最后一个元素,为两个区间中上限较大的那个
+            currentInterval[1] = Math.max(uniqIntervals[i][1], currentInterval[1]);
+        } else {
+            // 两个区间不用合并
+            res.push(uniqIntervals[i]);
+        }
+    }
+    return res;
 };
 ```
 
@@ -1582,6 +1888,52 @@ var maxSumSubmatrix = function(matrix, k) {
 };
 ```
 
+##### 最大整除子集(368)
+- 动态规划
+```javascript
+function compare(v1, v2) {
+    return v1 - v2;
+}
+
+var largestDivisibleSubset = function(nums) {
+    let array = new Array(nums.length).fill(1);
+    let length = 1;
+    // 最长整除子集的最后一个元素的索引
+    let index = 0;
+    // 排序数组，确保每回遍历只需要寻找前面的元素
+    nums = nums.sort(compare);
+    for (let i = 0; i < nums.length; i++) {
+        let tempLength = 1
+        for (let j = i - 1; j >= 0; j--) {
+            // 向前遍历数组，寻找能被当前元素nums[i]整除的元素
+            if (nums[i] % nums[j] == 0) {
+                tempLength = Math.max(tempLength, array[j] + 1);
+            }
+        }
+        array[i] = tempLength;
+        if (tempLength > length) {
+            length = tempLength;
+            index = i;
+        }
+    }
+    // console.log(array);
+    // console.log(length);
+    // 通过array回溯，找到最长整除子集
+    let res = [nums[index]];
+    let nextLength = length - 1;
+    let currentEle = nums[index];
+    for (let i = index - 1; i >= 0 && nextLength > 0; i--) {
+        if (array[i] == nextLength && currentEle % nums[i] == 0) {
+            res.unshift(nums[i]);
+            currentEle = nums[i];
+            nextLength--;
+        }
+    }
+    //console.log(res);
+    return res;
+};
+```
+
 ##### 字符串解码(394)
   - 栈解法
   ```javascript
@@ -2011,6 +2363,34 @@ var lenLongestFibSubseq = function(arr) {
         }
     }
     return length > 2 ? length : 0;
+};
+```
+
+##### 最长等差数列(1027)
+- 动态规划(O(n2))
+```javascript
+ar longestArithSeqLength = function(nums) {
+    let maxEle = Math.max(...nums);
+    let minEle = Math.min(...nums);
+    // dp[i][j]以nums[i],nums[j]结尾的最长等差数列的长度，隐式确定了公差为nums[j]-nums[i]
+    let dp = new Array(nums.length).fill(0).map(x => new Array(nums.length).fill(2))
+    let map = new Map();
+    let length = 2;
+
+    for (let i = 0; i < nums.length - 1; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+            let diff = nums[j] - nums[i];
+            let target = nums[i] - diff;
+            if (map.has(target)) {
+                let targetIndex = map.get(target);
+                //console.log(j, diff, targetIndex, dp[targetIndex][diff], dp[j][diff]);
+                dp[i][j] = dp[targetIndex][i] + 1;
+                length = Math.max(length, dp[i][j]);
+            }
+        }
+        map.set(nums[i], i);
+    }
+    return length;
 };
 ```
 
