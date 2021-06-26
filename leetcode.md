@@ -931,7 +931,7 @@ var maxDepth = function(root) {
 };
 ```
 
-##### 二叉树的前序遍历(144)
+##### 二叉树的cf遍历(144)
 - 迭代解法
 ```javascript
 /**
@@ -1257,6 +1257,74 @@ var connect = function(root) {
         }
     }
     return root;
+};
+```
+
+##### 买卖股票的最佳时机(121)
+- 动态规划
+```javascript
+/*
+    1. 动态规划做题步骤
+        明确 dp(i) 应该表示什么（二维情况：dp(i)(j)）；
+        根据 dp(i) 和 dp(i−1) 的关系得出状态转移方程；
+        确定初始条件，如 dp(0)。
+*/
+var maxProfit = function(prices) {
+    // dp[i]当前天数的最大利润
+    // dp[i] = max(dp[i - 1], prices[i] - minprice)
+    let minPrice = prices[0];
+    let profit = -Infinity;
+    for (let i = 1; i < prices.length; i++) {
+        let currentProfit = prices[i] - minPrice;
+        if (currentProfit > profit) {
+            profit = currentProfit;
+        }
+        if (minPrice > prices[i]) {
+            minPrice = prices[i];
+        }
+    }
+    return profit >= 0 ? profit : 0;
+};
+```
+
+##### 买卖股票的最佳时机II(122)
+- 贪心算法
+```javascript
+/*
+    只要前一天价格比后一天价格低，就能获益，所以应该累加获益
+*/
+var maxProfit = function(prices) {
+    // 贪心算法
+    let profit = 0;
+    for (let i = 0; i < prices.length - 1; i++) {
+        if (prices[i] <= prices[i + 1]) {
+            profit += prices[i + 1] - prices[i];
+        }
+    }
+    return profit;
+};
+```
+
+##### 买卖股票的最佳时机III(123)
+```javascript
+/*
+    只进行过一次买操作；
+    进行了一次买操作和一次卖操作，即完成了一笔交易；
+    在完成了一笔交易的前提下，进行了第二次买操作；
+    完成了全部两笔交易。
+*/
+var maxProfit = function(prices) {
+    let buy1 = -prices[0];
+    let sell1 = 0;
+    let buy2 = -prices[0];
+    let sell2 = 0;
+    for (let i = 1; i < prices.length; i++) {
+        buy1 = Math.max(buy1, -prices[i]);
+        sell1 = Math.max(sell1, prices[i] + buy1);
+        buy2 = Math.max(buy2, sell1 - prices[i]);
+        sell2 = Math.max(sell2, prices[i] + buy2);
+    }
+    return Math.max(sell1, sell2);
 };
 ```
 
@@ -2392,6 +2460,88 @@ ar longestArithSeqLength = function(nums) {
     }
     return length;
 };
+```
+
+##### 数组中重复的数字(剑指offer 3)
+```javascript
+/*
+    因为长度为length的数组中数字不超过nums，
+    此说明含义：数组元素的 索引 和 值 是 一对多 的关系。
+    因此，可遍历数组并通过交换操作，使元素的 索引 与 值 一一对应（即 nums[i] = inums[i]=i ）。
+    因而，就能通过索引映射对应的值，起到与字典等价的作用。
+*/
+var findRepeatNumber = function(nums) {
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] == i) {
+            continue;
+        } else if (nums[nums[i]] == nums[i]) {
+            return nums[i];
+        } else {
+            let temp = nums[i];
+            nums[i] = nums[nums[i]];
+            nums[temp] = temp;
+        }
+    }
+};
+```
+
+##### 二维数组中的查找(剑指offer 4)
+```javascript
+var findNumberIn2DArray = function(matrix, target) {
+    /*
+        从右上角开始遍历数组，
+        若target大于当前元素，下移一行
+        若target小于当前元素，左移一列
+        若等于直接返回
+    */
+
+    if (matrix.length == 0) {
+        return false;
+    }
+
+    let row = 0;
+    let column = matrix[0].length - 1;
+    while (row < matrix.length && column >= 0) {
+        if (target == matrix[row][column]) {
+            return true;
+        } else if (target > matrix[row][column]) {
+            row += 1;
+        } else {
+            column -= 1;
+        }
+    }
+    return false;
+};
+
+function rowBinarySearch(array, target) {
+    /*
+        返回刚好小于target的最大元素的索引
+        若target大于所有元素，返回array长度
+        若target小于所有元素，返回-1
+    */
+    let left = 0;
+    let right = array.length - 1;
+    let mid;
+    let pos = 0;
+    while (left <= right) {
+        mid = parseInt((left + right) / 2);
+        if (target < array[mid]) {
+            right = mid - 1;
+        } else if (target > array[mid]) {
+            pos = mid;
+            left = mid + 1;
+        } else {
+            return mid;
+        }
+    }
+    if (left >= array.length) {
+        return array.length;
+    } else if (right <= -1) {
+        return -1;
+    } else {
+        return pos;
+    }
+}
 ```
 
 ##### 数组中的逆序对(剑指offer 51)
